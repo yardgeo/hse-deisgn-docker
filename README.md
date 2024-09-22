@@ -1,1 +1,202 @@
-# hse-deisgn-docker
+# Семинар: развертывание отказоустойчивого приложения в Managed Service for Kubernetes® и MDB
+
+# Требуемое окружение
+
+Для самостоятельного выполнения работы необходимо настроить окружение самостоятельно.
+
+Для выполнения практической работы:
+1. Установите следующие утилиты:
+* yc (https://cloud.yandex.ru/docs/cli/quickstart);
+* Docker (https://docs.docker.com/get-docker/);
+* Kubectl (https://kubernetes.io/docs/tasks/tools/install-kubectl/);
+* envsubst;
+* git;
+* ssh;
+* curl.
+
+2. Зарегистрироваться в Яндекс.Облаке (https://cloud.yandex.ru/);
+3. Подключиться к облаку hse-design-students. 
+
+# Проверка кластера K8S
+## Шаг 1. Проверяем кластер
+* Добавить переменные окружения
+* Добавить учетные данные
+
+### Добавление переменных окружения
+1. На странице браузера, где создавалась группа узлов, проверьте, что создание группы завершено.
+2. В терминале проверьте, что кластер доступен к использованию:
+```
+yc managed-kubernetes cluster list
+echo "export K8S_ID=k8s-id-here" >> ~/.bashrc && . ~/.bashrc
+echo $K8S_ID
+yc managed-kubernetes cluster --id=$K8S_ID get
+yc managed-kubernetes cluster --id=$K8S_ID list-node-groups
+```
+
+### Добавление учетных данных в конфигурационный файл Kubectl
+```
+yc managed-kubernetes cluster get-credentials --id=$K8S_ID --external
+```
+Конфигурация будет записана в файл `~/.kube/config`, проверим его содержимое:
+```
+cat ~/.kube/config
+```
+
+# Подготовка Docker-образов
+## Шаг 2. Работаем с Docker
+* Создать Container Registry
+* Собрать Docker-образ
+
+### Создание Container Registry
+1. Создайте реестр: `yc container registry create --name lab-registry`;
+2. Сохраните id реестра:
+```
+echo "export REGISTRY_ID=registry-id-here" >> ~/.bashrc && . ~/.bashrc
+```
+2. Проверьте наличие реестра через терминал:
+```
+yc container registry list
+yc container registry get $REGISTRY_ID
+```
+
+3. Настройте аутентификацию в docker:
+```
+yc container registry configure-docker
+cat ~/.docker/config.json
+```
+Файл `config.json` содержит вашу конфигурацию после авторизации:
+```
+{
+  "credHelpers": {
+    "container-registry.cloud.yandex.net": "yc",
+    "cr.cloud.yandex.net": "yc",
+    "cr.yandex": "yc"
+  }
+}
+```
+
+### Сборка и загрузка Docker-образов в Container Registry
+1. Перейдите к исходникам приложения:
+```
+cd $REPO/app && ls
+```
+
+2. Соберите образ приложения:
+```
+sudo docker build . --tag cr.yandex/$REGISTRY_ID/lab-demo:v1
+sudo docker images
+```
+
+3. Загрузите образ
+```
+sudo docker push cr.yandex/$REGISTRY_ID/lab-demo:v1
+```
+
+### Просмотр списка Docker-образов
+
+1. Получите список Docker-образов в реестре командой `yc container image list`.
+* В результате в таблице отборазятся ID образа, дата его создания и другие данные.
+
+# Развертывание приложения и балансировщика нагрузки в k8s
+## Шаг 3. Работаем с kubectl
+
+1. Просмотрите файлы конфигурации:
+```
+cd $REPO/k8s-files && ls
+cat lab-demo.yaml.tpl
+cat load-balancer.yaml
+```
+
+2. В файле `lab-demo.yaml.tpl` замените значение переменных:
+* Переменные `DATABASE_URI` и `DATABASE_HOSTS` получены в результате работы terraform на четвертом шаге.
+* `REGISTRY_ID` получали ранее с помощью команды `yc container registry list`.
+```
+envsubst \$REGISTRY_ID,\$DATABASE_URI,\$DATABASE_HOSTS <lab-demo.yaml.tpl > lab-demo.yaml
+cat lab-demo.yaml
+```
+
+3. Убедитесь что все переменные окружения из файла `lab-demo.yaml.tpl` заменились на реальные значения
+в файле `lab-demo.yaml`
+
+4. Разверните ресурсы:
+```
+kubectl apply -f lab-demo.yaml
+kubectl describe deployment lab-demo
+```
+
+```
+kubectl apply -f load-balancer.yaml
+kubectl describe service lab-demo
+```
+
+5. Как только балансировщик нагрузки полноценно развернется и получит внешний URL (поле `LoadBalancer Ingress`),
+проверим работоспособность сервиса в браузере.
+
+# Изменения в архитектуре сервиса для обеспечения отказоустойчивости
+## Шаг 4. Изменения в архитектуре сервиса
+
+После выполнения всех шагов имеем:
+* MDB PostgreSQL с одним хостом.
+* Managed Kubernetes с зональным мастером (1 хост) и группой узлов из одного узла.
+* одну реплику приложения, запущенную в k8s.
+
+### Отказоустойчивый MDB PostgreSQL
+
+В MDB можно увеличить количество хостов в кластере без остановки работы.
+1. Перейдите во вкладку `Managed Service for PostgreSQL` в UI, выберите созданный кластер, во вкладке `Хосты` добавьте хост.
+2. Выберите зону доступности, отличную от той, которая используется для первого хоста.
+3. Убедитесь, что у хостов в кластере достаточно ресурсов, чтобы обрабатывать возвросшую нагрузку при отказе одного
+или нескольких хостов.
+
+### Отказоустойчивый Managed Kubernetes
+
+Необходимо создать региональный мастер, состоящий из трех хостов. Тип мастера уже созданного кластера
+поменять нельзя, поэтому придется создать новый кластер.
+1. Перейдите во вкладку `Managed Service for Kubernetes` и создайте новый кластер.
+2. Выберите тип мастера `Региональный`.
+3. Создайте группу узлов с тремя узлами.
+4. Убедитесь, что у хостов в группе узлов достаточно ресурсов, чтобы обрабатывать возвросшую нагрузку при отказе одного
+или нескольких хостов.
+
+### Отказоустойчивое приложение
+
+При развертывании приложения в k8s вы указывали одну реплику, теперь надо увеличить количество реплик до трех. Созданный
+балансировщик нагрузки будет распределять нагрузку по всем трем репликам.
+
+# Удаление ресурсов
+## Шаг 5. Удаление ресурсов
+* Удаление ресурсов из кластера k8s.  
+* Удаление кластера k8s.  
+* Удаление базы данных в Terraform.  
+* Удаление реестра и Docker-образов.  
+* Удаление ВМ с настроенным окружением.  
+
+### Удаление ресурсов из кластера k8s
+```
+kubectl delete -f load-balancer.yaml
+kubectl delete -f lab-demo.yaml
+```
+
+### Удаление кластера k8s
+```
+yc managed-kubernetes cluster list
+yc managed-kubernetes cluster delete lab-k8s
+yc managed-kubernetes cluster list
+```
+
+### Удаление базы данных в Terraform
+```
+cd $REPO/terraform
+terraform destroy -var yc_folder=$FOLDER_ID -var user=$USER
+yc managed-postgresql cluster list
+```
+
+### Удаление реестра и Docker-образов
+Перейдите во вкладку `Container Registry` в Консоли, выберите реестр `lab-registry` и удалите в нем все образы.
+После этого вернитесь к списку реестров, нажмите раскрывающееся меню для реестра `lab-registry` и удалите реестр.
+
+### Удаление ВМ с настроенным окружением 
+В консоли перейдите во вкладку `Compute`, нажмите раскрывающееся меню для ВМ `lab-vm` и удалите эту ВМ.
+
+## P.S.
+Inspired by Yandex.Disk praktikum - https://youtu.be/jWttCo73rTQ?si=Au-VgAF-_1FlYom7 
