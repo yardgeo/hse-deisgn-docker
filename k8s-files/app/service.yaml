@@ -10,3 +10,4 @@ spec:
     - protocol: TCP
       port: 80  # Внешний порт для доступа
       targetPort: 80  # Порт, на котором работает Flask внутри контейнера
+  sessionAffinity: None
