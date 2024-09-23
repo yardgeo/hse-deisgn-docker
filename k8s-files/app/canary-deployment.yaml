@@ -1,8 +1,10 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: order-app-deployment
-  version: v2
+  name: order-app-deployment-v2
+  labels:
+    app: order-app
+    version: v2
 spec:
   replicas: 1  # Число реплик приложения
   selector:
