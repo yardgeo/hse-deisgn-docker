@@ -5,15 +5,10 @@ import os
 app = Flask(__name__, template_folder="templates")
 
 # Database
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URI']
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False  # silence the deprecation warning
 
-db = SQLAlchemy(app, engine_options={'connect_args': {
-    'sslmode': 'require',
-    'host': os.environ['DATABASE_HOSTS'],
-    'port': 6432,
-    'target_session_attrs': 'read-write',
-}})
+db = SQLAlchemy(app)
 
 # Модель для заказа
 class Order(db.Model):
