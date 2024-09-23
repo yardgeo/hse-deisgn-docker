@@ -83,13 +83,13 @@ cd $REPO/app && ls
 
 2. Соберите образ приложения:
 ```
-sudo docker build . --tag cr.yandex/$REGISTRY_ID/lab-demo:v1
-sudo docker images
+docker build . --tag cr.yandex/$REGISTRY_ID/order-app:v1
+docker images
 ```
 
 3. Загрузите образ
 ```
-sudo docker push cr.yandex/$REGISTRY_ID/lab-demo:v1
+docker push cr.yandex/$REGISTRY_ID/order-app:v1
 ```
 
 ### Просмотр списка Docker-образов
@@ -102,31 +102,25 @@ sudo docker push cr.yandex/$REGISTRY_ID/lab-demo:v1
 
 1. Просмотрите файлы конфигурации:
 ```
-cd $REPO/k8s-files && ls
-cat lab-demo.yaml.tpl
-cat load-balancer.yaml
+cd $REPO/k8s-files/db && ls
 ```
 
-2. В файле `lab-demo.yaml.tpl` замените значение переменных:
-* Переменные `DATABASE_URI` и `DATABASE_HOSTS` получены в результате работы terraform на четвертом шаге.
-* `REGISTRY_ID` получали ранее с помощью команды `yc container registry list`.
+2. Раверните базу данных:
 ```
-envsubst \$REGISTRY_ID,\$DATABASE_URI,\$DATABASE_HOSTS <lab-demo.yaml.tpl > lab-demo.yaml
-cat lab-demo.yaml
+kubectl apply -f pvc.yaml
+kubectl apply -f deployment.yaml
+kubectl apply -f service.yaml
 ```
 
-3. Убедитесь что все переменные окружения из файла `lab-demo.yaml.tpl` заменились на реальные значения
-в файле `lab-demo.yaml`
-
-4. Разверните ресурсы:
+3. Раверните приложение:
 ```
-kubectl apply -f lab-demo.yaml
-kubectl describe deployment lab-demo
+cd ../app
+kubectl apply -f deployment.yaml
+kubectl apply -f service.yaml
 ```
 
 ```
-kubectl apply -f load-balancer.yaml
-kubectl describe service lab-demo
+kubectl describe service order-app
 ```
 
 5. Как только балансировщик нагрузки полноценно развернется и получит внешний URL (поле `LoadBalancer Ingress`),
@@ -162,8 +156,13 @@ kubectl describe service lab-demo
 
 ### Удаление ресурсов из кластера k8s
 ```
-kubectl delete -f load-balancer.yaml
-kubectl delete -f lab-demo.yaml
+cd app
+kubectl delete -f service.yaml
+kubectl delete -f deployment.yaml
+cd ../db
+kubectl delete -f service.yaml
+kubectl delete -f deployment.yaml
+kubectl delete -f pvc.yaml
 ```
 
 ### Удаление кластера k8s
