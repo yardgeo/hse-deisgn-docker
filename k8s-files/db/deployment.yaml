@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres-deployment
+spec:
+  replicas: 1  # Одна реплика для базы данных
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:15  # Образ базы данных Postgres
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_DB
+              value: user  # Имя базы данных
+            - name: POSTGRES_USER
+              value: postgres  # Пользователь базы данных
+            - name: POSTGRES_PASSWORD
+              value: password  # Пароль
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data  # Куда монтировать хранилище в контейнере
+              name: postgres-storage
+      volumes:
+        - name: postgres-storage
+          persistentVolumeClaim:
+            claimName: postgres-pvc
