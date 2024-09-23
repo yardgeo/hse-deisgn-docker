@@ -1,6 +1,8 @@
+import os
+import datetime
+
 from flask import Flask, render_template, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
-import os
 
 app = Flask(__name__, template_folder="templates")
 
@@ -30,6 +32,7 @@ def index():
             # Создание нового заказа
             name = request.form.get('name')
             time = request.form.get('time')
+            # time = datetime.datetime.now().isoformat()
             location = request.form.get('location')
             new_order = Order(name=name, time=time, location=location)
             db.session.add(new_order)
