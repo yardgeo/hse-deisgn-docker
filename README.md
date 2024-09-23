@@ -48,7 +48,7 @@ cat ~/.kube/config
 * Собрать Docker-образ
 
 ### Создание Container Registry
-1. Создайте реестр: `yc container registry create --name lab-registry`;
+1. Создайте реестр: `yc container registry create --name {YOUR_NAME}`;
 2. Сохраните id реестра:
 ```
 echo "export REGISTRY_ID=registry-id-here" >> ~/.bashrc && . ~/.bashrc
@@ -97,8 +97,15 @@ docker push cr.yandex/$REGISTRY_ID/order-app:v1
 1. Получите список Docker-образов в реестре командой `yc container image list`.
 * В результате в таблице отборазятся ID образа, дата его создания и другие данные.
 
+# Изолируем свое рабочее пространство
+## Шаг 3.0. Создаем namespace
+```
+kubectl create namespace {YOUR_NAMESPACE}
+kubectl config set-context --current --namespace={YOUR_NAMESPACE}
+```
+
 # Развертывание приложения и балансировщика нагрузки в k8s
-## Шаг 3. Работаем с kubectl
+## Шаг 3.1. Работаем с kubectl
 
 1. Просмотрите файлы конфигурации:
 ```
