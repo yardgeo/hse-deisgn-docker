@@ -1,16 +1,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: order-app-deployment
+  name: order-app-deployment-v1
+  labels:
+    app: order-app
+    version: v1
 spec:
   replicas: 2  # Число реплик приложения
   selector:
     matchLabels:
       app: order-app
+      version: v1
   template:
     metadata:
       labels:
         app: order-app
+        version: v1
     spec:
       containers:
         - name: order-app
