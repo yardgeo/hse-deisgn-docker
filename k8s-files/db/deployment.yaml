@@ -19,7 +19,7 @@ spec:
             - containerPort: 5432
           env:
             - name: POSTGRES_DB
-              value: user  # Имя базы данных
+              value: order  # Имя базы данных
             - name: POSTGRES_USER
               value: postgres  # Пользователь базы данных
             - name: POSTGRES_PASSWORD
