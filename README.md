@@ -55,8 +55,11 @@ cat ~/.kube/config
 * Собрать Docker-образ
 
 ### Создание Container Registry
-1. Создайте реестр: `yc container registry create --name {YOUR_NAME}`;
-2. Сохраните id реестра:
+1. Создайте реестр:
+```
+yc container registry create --name {YOUR_NAME}
+```
+7. Сохраните id реестра:
 ```
 export REGISTRY_ID=registry-id-here
 ```
