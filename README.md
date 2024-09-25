@@ -223,3 +223,8 @@ kubectl delete -f service.yaml
 kubectl delete -f deployment.yaml
 kubectl delete -f pvc.yaml
 ```
+### Удаление namespace k8s
+```
+config set-context --current --namespace=default
+kubectl delete namespace $NAMESCPACE_ID
+```
