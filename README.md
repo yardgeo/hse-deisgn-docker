@@ -21,7 +21,7 @@
 ```
 git clone https://github.com/yardgeo/hse-deisgn-docker.git
 cd hse-deisgn-docker
-echo "export REPO=path_to_repo_here" >> ~/.bashrc && . ~/.bashrc
+export REPO=path-to-repo-here
 ```
 
 # Проверка кластера K8S
@@ -34,7 +34,7 @@ echo "export REPO=path_to_repo_here" >> ~/.bashrc && . ~/.bashrc
 2. В терминале проверьте, что кластер доступен к использованию:
 ```
 yc managed-kubernetes cluster list
-echo "export K8S_ID=k8s-id-here" >> ~/.bashrc && . ~/.bashrc
+export K8S_ID=k8s-id-here
 echo $K8S_ID
 yc managed-kubernetes cluster --id=$K8S_ID get
 yc managed-kubernetes cluster --id=$K8S_ID list-node-groups
@@ -58,7 +58,7 @@ cat ~/.kube/config
 1. Создайте реестр: `yc container registry create --name {YOUR_NAME}`;
 2. Сохраните id реестра:
 ```
-echo "export REGISTRY_ID=registry-id-here" >> ~/.bashrc && . ~/.bashrc
+export REGISTRY_ID=registry-id-here
 ```
 2. Проверьте наличие реестра через терминал:
 ```
@@ -108,7 +108,7 @@ docker push cr.yandex/$REGISTRY_ID/order-app:v1
 ## Шаг 3.0. Создаем namespace
 3.0.1 Сохраните id NAMESPACE:
 ```
-echo "export NAMESCPACE_ID=registry-id-here" >> ~/.bashrc && . ~/.bashrc
+export NAMESCPACE_ID=namespace-id-here
 ```
 3.0.2 Создаем namespace
 ```
