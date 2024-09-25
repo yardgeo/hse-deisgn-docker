@@ -99,9 +99,14 @@ docker push cr.yandex/$REGISTRY_ID/order-app:v1
 
 # Изолируем свое рабочее пространство
 ## Шаг 3.0. Создаем namespace
+3.0.1 Сохраните id NAMESPACE:
 ```
-kubectl create namespace {YOUR_NAMESPACE}
-kubectl config set-context --current --namespace={YOUR_NAMESPACE}
+echo "export NAMESCPACE_ID=registry-id-here" >> ~/.bashrc && . ~/.bashrc
+```
+3.0.2 Создаем namespace
+```
+kubectl create namespace $NAMESCPACE_ID
+kubectl config set-context --current --namespace=$NAMESCPACE_ID
 ```
 
 # Развертывание приложения и балансировщика нагрузки в k8s
@@ -119,14 +124,17 @@ kubectl apply -f deployment.yaml
 kubectl apply -f service.yaml
 ```
 
-3. Раверните приложение:
+3. Создайте файлы деплоймента и сервиса из шаблонов:
 ```
-cd ../app
-kubectl apply -f deployment.yaml
-kubectl apply -f service.yaml
+envsubst \$REGISTRY_ID,\$NAMESCPACE_ID <deployment.yaml.tpl > deployment.yaml
+envsubst \$REGISTRY_ID,\$NAMESCPACE_ID <canary-deployment.yaml.tpl > canary-deployment.yaml
+cat deployment.yaml
 ```
 
+4. Раверните приложение:
 ```
+kubectl apply -f deployment.yaml
+kubectl apply -f service.yaml
 kubectl describe service order-app
 ```
 
