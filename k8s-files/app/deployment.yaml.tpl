@@ -24,4 +24,4 @@ spec:
             - containerPort: 80
           env:
             - name: DATABASE_URL
-              value: "postgresql://postgres:password@postgres-service.$NAMESCPACE.svc.cluster.local:5432/order"
+              value: "postgresql://postgres:password@postgres-service.$NAMESCPACE_ID.svc.cluster.local:5432/order"
