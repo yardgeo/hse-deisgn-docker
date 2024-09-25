@@ -15,7 +15,15 @@
 * curl.
 
 2. Зарегистрироваться в Яндекс.Облаке (https://cloud.yandex.ru/);
-3. Подключиться к облаку hse-design-students. 
+3. Подключиться к облаку hse-design-students.
+
+# Настройка окружения
+## Шаг 0. Git clone
+```
+git clone https://github.com/yardgeo/hse-deisgn-docker.git
+cd hse-deisgn-docker
+echo "export REPO=path_to_repo_here" >> ~/.bashrc && . ~/.bashrc
+```
 
 # Проверка кластера K8S
 ## Шаг 1. Проверяем кластер
@@ -126,6 +134,7 @@ kubectl apply -f service.yaml
 
 3. Создайте файлы деплоймента и сервиса из шаблонов:
 ```
+cd $REPO/app
 envsubst \$REGISTRY_ID,\$NAMESCPACE_ID <deployment.yaml.tpl > deployment.yaml
 envsubst \$REGISTRY_ID,\$NAMESCPACE_ID <canary-deployment.yaml.tpl > canary-deployment.yaml
 cat deployment.yaml
@@ -188,10 +197,10 @@ kubectl get pods -l app=order-app
 
 ### Удаление ресурсов из кластера k8s
 ```
-cd app
+cd $REPO/app
 kubectl delete -f service.yaml
 kubectl delete -f deployment.yaml
-cd ../db
+cd $REPO/db
 kubectl delete -f service.yaml
 kubectl delete -f deployment.yaml
 kubectl delete -f pvc.yaml
