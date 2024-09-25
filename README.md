@@ -155,15 +155,27 @@ kubectl describe service order-app
 # Обновление приложения
 ## Шаг 4. Изменения в сервисы и его выкатка (canary-deployment)
 1. Внесите изменения в приложения
-2. Задеплойте новую версию
+```
+cd $REPO/app
+```
+2. Соберите вторую версию приложения:
+```
+docker build . --tag cr.yandex/$REGISTRY_ID/order-app:v2
+docker images
+```
+3. Загрузите образ
+```
+docker push cr.yandex/$REGISTRY_ID/order-app:v2
+```
+4. Задеплойте новую версию
 ```
 cd $REPO/k8s-files/app
 kubectl apply -f canary-deployment.yaml
 kubectl get pods -l app=order-app
 ```
 
-3. Необходимо убедиться, что новая версия сервиса работает корректно
-4. Если все хорошо, то раскатываем ее
+5. Необходимо убедиться, что новая версия сервиса работает корректно
+6. Если все хорошо, то раскатываем ее
 
 ```
 kubectl scale deployment order-app-deployment-v2 --replicas=3
