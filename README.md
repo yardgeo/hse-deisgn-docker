@@ -154,17 +154,20 @@ kubectl describe service order-app
 
 # Обновление приложения
 ## Шаг 4. Изменения в сервисы и его выкатка (canary-deployment)
+1. Внесите изменения в приложения
+2. Задеплойте новую версию
 ```
 cd app
 kubectl apply -f canary-deployment.yaml
 kubectl get pods -l app=order-app
 ```
 
-Необходимо убедиться, что новая версия сервиса работает корректно
+3. Необходимо убедиться, что новая версия сервиса работает корректно
+4. Если все хорошо, то раскатываем ее
 
 ```
-kubectl scale deployment order-app-deployment-v1 --replicas=0
 kubectl scale deployment order-app-deployment-v2 --replicas=3
+kubectl scale deployment order-app-deployment-v1 --replicas=0
 kubectl get pods -l app=order-app
 ```
 
