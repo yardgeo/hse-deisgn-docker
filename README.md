@@ -157,7 +157,7 @@ kubectl describe service order-app
 1. Внесите изменения в приложения
 2. Задеплойте новую версию
 ```
-cd app
+cd $REPO/app
 kubectl apply -f canary-deployment.yaml
 kubectl get pods -l app=order-app
 ```
