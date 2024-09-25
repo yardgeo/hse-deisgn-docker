@@ -11,7 +11,6 @@
 * Kubectl (https://kubernetes.io/docs/tasks/tools/install-kubectl/);
 * envsubst;
 * git;
-* ssh;
 * curl.
 
 2. Зарегистрироваться в Яндекс.Облаке (https://cloud.yandex.ru/);
