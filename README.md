@@ -216,6 +216,7 @@ kubectl get pods -l app=order-app
 ```
 cd $REPO/k8s-files/app
 kubectl delete -f service.yaml
+kubectl delete -f canary-deployment.yaml
 kubectl delete -f deployment.yaml
 cd $REPO/k8s-files/db
 kubectl delete -f service.yaml
