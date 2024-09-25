@@ -136,7 +136,7 @@ kubectl apply -f service.yaml
 
 3. Создайте файлы деплоймента и сервиса из шаблонов:
 ```
-cd $REPO/app
+cd $REPO/k8s-files/app
 envsubst \$REGISTRY_ID,\$NAMESCPACE_ID <deployment.yaml.tpl > deployment.yaml
 envsubst \$REGISTRY_ID,\$NAMESCPACE_ID <canary-deployment.yaml.tpl > canary-deployment.yaml
 cat deployment.yaml
@@ -199,22 +199,11 @@ kubectl get pods -l app=order-app
 
 ### Удаление ресурсов из кластера k8s
 ```
-cd $REPO/app
+cd $REPO/k8s-files/app
 kubectl delete -f service.yaml
 kubectl delete -f deployment.yaml
-cd $REPO/db
+cd $REPO/k8s-files/db
 kubectl delete -f service.yaml
 kubectl delete -f deployment.yaml
 kubectl delete -f pvc.yaml
 ```
-
-### Удаление кластера k8s
-```
-yc managed-kubernetes cluster list
-yc managed-kubernetes cluster delete lab-k8s
-yc managed-kubernetes cluster list
-```
-
-### Удаление реестра и Docker-образов
-Перейдите во вкладку `Container Registry` в Консоли, выберите реестр `lab-registry` и удалите в нем все образы.
-После этого вернитесь к списку реестров, нажмите раскрывающееся меню для реестра `lab-registry` и удалите реестр.
