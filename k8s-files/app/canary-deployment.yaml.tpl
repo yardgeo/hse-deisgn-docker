@@ -19,9 +19,9 @@ spec:
     spec:
       containers:
         - name: order-app
-          image: cr.yandex/${REGISTRY_ID}/order-app:v2
+          image: cr.yandex/$REGISTRY_ID/order-app:v2
           ports:
             - containerPort: 80
           env:
             - name: DATABASE_URL
-              value: "postgresql://postgres:password@postgres-service.${NAMESCPACE}.svc.cluster.local:5432/order"
+              value: "postgresql://postgres:password@postgres-service.$NAMESCPACE.svc.cluster.local:5432/order"
